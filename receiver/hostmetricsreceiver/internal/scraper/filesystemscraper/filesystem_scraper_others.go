@@ -30,6 +30,10 @@ func appendFileSystemUsageStateDataPoints(idps pdata.NumberDataPointSlice, now p
 	initializeFileSystemUsageDataPoint(idps.AppendEmpty(), now, deviceUsage.partition, metadata.AttributeState.Free, int64(deviceUsage.usage.Free))
 }
 
+func appendFileSystemUtilizationStateDataPoints(idps pdata.NumberDataPointSlice, now pdata.Timestamp, deviceUsage *deviceUsage) {
+	initializeFileSystemUtilizationDataPoint(idps.AppendEmpty(), now, deviceUsage.partition, metadata.AttributeState.Utilization, deviceUsage.usage.UsedPercent/100)
+}
+
 const systemSpecificMetricsLen = 0
 
 func appendSystemSpecificMetrics(metrics pdata.MetricSlice, now pdata.Timestamp, deviceUsages []*deviceUsage) {

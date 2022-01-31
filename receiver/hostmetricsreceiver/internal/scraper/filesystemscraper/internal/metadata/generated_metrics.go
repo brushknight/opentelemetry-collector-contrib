@@ -43,6 +43,7 @@ func (m *metricImpl) Init(metric pdata.Metric) {
 type metricStruct struct {
 	SystemFilesystemInodesUsage MetricIntf
 	SystemFilesystemUsage       MetricIntf
+	SystemFilesystemUtilization MetricIntf
 }
 
 // Names returns a list of all the metric name strings.
@@ -50,12 +51,14 @@ func (m *metricStruct) Names() []string {
 	return []string{
 		"system.filesystem.inodes.usage",
 		"system.filesystem.usage",
+		"system.filesystem.utilization",
 	}
 }
 
 var metricsByName = map[string]MetricIntf{
 	"system.filesystem.inodes.usage": Metrics.SystemFilesystemInodesUsage,
 	"system.filesystem.usage":        Metrics.SystemFilesystemUsage,
+	"system.filesystem.utilization":  Metrics.SystemFilesystemUtilization,
 }
 
 func (m *metricStruct) ByName(n string) MetricIntf {
@@ -85,6 +88,15 @@ var Metrics = &metricStruct{
 			metric.SetDataType(pdata.MetricDataTypeSum)
 			metric.Sum().SetIsMonotonic(false)
 			metric.Sum().SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		},
+	},
+	&metricImpl{
+		"system.filesystem.utilization",
+		func(metric pdata.Metric) {
+			metric.SetName("system.filesystem.utilization")
+			metric.SetDescription("Percentage of filesystem used bytes.")
+			metric.SetUnit("1")
+			metric.SetDataType(pdata.MetricDataTypeGauge)
 		},
 	},
 }
@@ -118,11 +130,13 @@ var A = Attributes
 
 // AttributeState are the possible values that the attribute "state" can have.
 var AttributeState = struct {
-	Free     string
-	Reserved string
-	Used     string
+	Free        string
+	Reserved    string
+	Used        string
+	Utilization string
 }{
 	"free",
 	"reserved",
 	"used",
+	"utilization",
 }

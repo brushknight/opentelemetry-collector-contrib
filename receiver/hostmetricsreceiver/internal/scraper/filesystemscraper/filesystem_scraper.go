@@ -86,6 +86,7 @@ func (s *scraper) Scrape(_ context.Context) (pdata.Metrics, error) {
 	if len(usages) > 0 {
 		metrics.EnsureCapacity(metricsLen)
 		initializeFileSystemUsageMetric(metrics.AppendEmpty(), now, usages)
+		initializeFileSystemUtilizationMetric(metrics.AppendEmpty(), now, usages)
 		appendSystemSpecificMetrics(metrics, now, usages)
 	}
 
@@ -116,6 +117,27 @@ func initializeFileSystemUsageDataPoint(dataPoint pdata.NumberDataPoint, now pda
 	attributes.InsertString(metadata.Attributes.State, stateLabel)
 	dataPoint.SetTimestamp(now)
 	dataPoint.SetIntVal(value)
+}
+
+func initializeFileSystemUtilizationMetric(metric pdata.Metric, now pdata.Timestamp, deviceUsages []*deviceUsage) {
+	metadata.Metrics.SystemFilesystemUtilization.Init(metric)
+
+	idps := metric.Gauge().DataPoints()
+	idps.EnsureCapacity(fileSystemStatesLen * len(deviceUsages))
+	for _, deviceUsage := range deviceUsages {
+		appendFileSystemUtilizationStateDataPoints(idps, now, deviceUsage)
+	}
+}
+
+func initializeFileSystemUtilizationDataPoint(dataPoint pdata.NumberDataPoint, now pdata.Timestamp, partition disk.PartitionStat, stateLabel string, value float64) {
+	attributes := dataPoint.Attributes()
+	attributes.InsertString(metadata.Attributes.Device, partition.Device)
+	attributes.InsertString(metadata.Attributes.Type, partition.Fstype)
+	attributes.InsertString(metadata.Attributes.Mode, getMountMode(partition.Opts))
+	attributes.InsertString(metadata.Attributes.Mountpoint, partition.Mountpoint)
+	attributes.InsertString(metadata.Attributes.State, stateLabel)
+	dataPoint.SetTimestamp(now)
+	dataPoint.SetDoubleVal(value)
 }
 
 func getMountMode(opts []string) string {
