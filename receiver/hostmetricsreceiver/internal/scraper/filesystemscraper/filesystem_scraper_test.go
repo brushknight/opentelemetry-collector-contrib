@@ -265,7 +265,7 @@ func TestScrape(t *testing.T) {
 				assertFileSystemUsageMetricHasUnixSpecificStateLabels(t, metrics.At(0))
 				assertFileSystemUsageMetricValid(
 					t,
-					metrics.At(1),
+					metrics.At(2),
 					test.expectedDeviceDataPoints*2,
 					test.expectedDeviceAttributes,
 				)
